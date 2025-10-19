@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전세자금대출 계산기 - LTV 80% 한도 계산</title>
+    <meta name="description" content="전세자금대출 한도, 이자, 월 상환액 계산기. LTV 80% 기준, 보증금별 대출 가능 금액 확인.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        h1 {
+            font-size: 2.2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        nav a {
+            padding: 12px 20px;
+            background: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        nav a:hover {
+            background: #667eea;
+            color: white;
+        }
+        .info-box {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        .calc-group {
+            margin-bottom: 25px;
+        }
+        .calc-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        .hint {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .calc-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+        .result-value {
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+        }
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏘️ 전세자금대출 계산기</h1>
+        </header>
+
+        <nav>
+            <a href="index.html">🏠 주택담보대출</a>
+            <a href="jeonse-loan.html">🏘️ 전세자금대출</a>
+            <a href="credit-loan.html">💳 신용대출</a>
+            <a href="dsr-calculator.html">📊 DSR/DTI</a>
+            <a href="loan-guide.html">📖 대출가이드</a>
+        </nav>
+
+        <div class="info-box">
+            <h3>📌 전세자금대출이란?</h3>
+            <p><strong>대출한도:</strong> 전세보증금의 최대 80% (LTV 80%)</p>
+            <p><strong>금리:</strong> 연 2.4~4.5% (소득 및 주택가격에 따라 차등)</p>
+            <p><strong>상환방식:</strong> 만기일시상환 또는 원리금균등상환</p>
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">🏠 전세 보증금 (만원)</label>
+            <input type="number" id="deposit" placeholder="예: 30000 (3억원)">
+            <div class="hint">💡 전세 계약서의 보증금을 입력하세요</div>
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">📊 LTV 비율 (%)</label>
+            <select id="ltv">
+                <option value="80">80% (일반)</option>
+                <option value="70">70% (규제지역)</option>
+                <option value="60">60% (투기과열지구)</option>
+            </select>
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">📈 연 이자율 (%)</label>
+            <input type="number" step="0.1" id="rate" placeholder="예: 3.5">
+            <div class="hint">💡 2025년 평균: 3.0~4.5%</div>
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">📅 대출 기간 (년)</label>
+            <input type="number" id="period" placeholder="예: 2">
+        </div>
+
+        <button class="calc-button" onclick="calculate()">💰 대출 한도 계산하기</button>
+
+        <div id="result" class="result">
+            <h3>💳 계산 결과</h3>
+            <div class="result-item">
+                <span>대출 가능 금액</span>
+                <span class="result-value" id="loanAmount">-</span>
+            </div>
+            <div class="result-item">
+                <span>월 이자 (만기일시)</span>
+                <span class="result-value" id="monthlyInterest">-</span>
+            </div>
+            <div class="result-item">
+                <span>총 이자 (전체기간)</span>
+                <span class="result-value" id="totalInterest">-</span>
+            </div>
+        </div>
+
+        <footer>
+            <p>💡 더 많은 정보: <a href="loan-guide.html">대출 가이드</a> | <a href="dsr-calculator.html">DSR 계산</a></p>
+            <p>© 2025 대출 계산기</p>
+        </footer>
+    </div>
+
+    <script>
+        function calculate() {
+            const deposit = parseFloat(document.getElementById('deposit').value) * 10000;
+            const ltv = parseFloat(document.getElementById('ltv').value) / 100;
+            const rate = parseFloat(document.getElementById('rate').value) / 100;
+            const years = parseFloat(document.getElementById('period').value);
+
+            if (!deposit || !rate || !years) {
+                alert('모든 값을 입력해주세요!');
+                return;
+            }
+
+            const loanAmount = deposit * ltv;
+            const monthlyRate = rate / 12;
+            const monthlyInterest = loanAmount * monthlyRate;
+            const totalInterest = monthlyInterest * years * 12;
+
+            document.getElementById('loanAmount').textContent = Math.round(loanAmount).toLocaleString('ko-KR') + '원';
+            document.getElementById('monthlyInterest').textContent = Math.round(monthlyInterest).toLocaleString('ko-KR') + '원';
+            document.getElementById('totalInterest').textContent = Math.round(totalInterest).toLocaleString('ko-KR') + '원';
+            document.getElementById('result').classList.add('show');
+        }
+    </script>
+</body>
+</html>

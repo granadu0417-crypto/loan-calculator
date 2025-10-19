@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>신용대출 계산기 - 한도 및 이자 계산</title>
+    <meta name="description" content="신용대출 한도, 월 상환액, 이자 계산기. 신용등급별 금리 비교, DSR 고려한 대출 가능 금액 확인.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #667eea; }
+        h1 { font-size: 2.2em; color: #333; margin-bottom: 10px; }
+        nav { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+        nav a { padding: 12px 20px; background: #f0f0f0; color: #333; text-decoration: none; border-radius: 8px; transition: all 0.3s; }
+        nav a:hover { background: #667eea; color: white; }
+        .info-box { background: #f8f9ff; padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #667eea; }
+        .calc-group { margin-bottom: 25px; }
+        .calc-label { display: block; font-weight: 600; margin-bottom: 8px; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; }
+        .hint { font-size: 0.9em; color: #888; margin-top: 5px; }
+        .calc-button { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 600; cursor: pointer; }
+        .result { margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; display: none; }
+        .result.show { display: block; }
+        .result-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.3); }
+        .result-value { font-weight: 700; font-size: 1.2em; }
+        footer { margin-top: 40px; text-align: center; color: #666; }
+        footer a { color: #667eea; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💳 신용대출 계산기</h1>
+        </header>
+
+        <nav>
+            <a href="index.html">🏠 주택담보대출</a>
+            <a href="jeonse-loan.html">🏘️ 전세자금대출</a>
+            <a href="credit-loan.html">💳 신용대출</a>
+            <a href="dsr-calculator.html">📊 DSR/DTI</a>
+            <a href="loan-guide.html">📖 대출가이드</a>
+        </nav>
+
+        <div class="info-box">
+            <h3>📌 신용대출이란?</h3>
+            <p><strong>담보 없이:</strong> 개인의 신용도만으로 대출 가능</p>
+            <p><strong>금리:</strong> 연 3.5~15% (신용등급에 따라 차등)</p>
+            <p><strong>한도:</strong> 연소득의 최대 1배 (DSR 규제 적용)</p>
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">💰 희망 대출금액 (만원)</label>
+            <input type="number" id="loanAmount" placeholder="예: 5000 (5천만원)">
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">⭐ 신용등급</label>
+            <select id="creditGrade">
+                <option value="4.5">1~2등급 (4.5%)</option>
+                <option value="6.5">3~4등급 (6.5%)</option>
+                <option value="9.0">5~6등급 (9.0%)</option>
+                <option value="12.0">7~8등급 (12.0%)</option>
+                <option value="15.0">9~10등급 (15.0%)</option>
+            </select>
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">📅 대출 기간 (년)</label>
+            <select id="period">
+                <option value="1">1년</option>
+                <option value="2">2년</option>
+                <option value="3" selected>3년</option>
+                <option value="5">5년</option>
+            </select>
+        </div>
+
+        <button class="calc-button" onclick="calculate()">💰 월 상환액 계산하기</button>
+
+        <div id="result" class="result">
+            <h3>💳 계산 결과</h3>
+            <div class="result-item">
+                <span>월 상환액</span>
+                <span class="result-value" id="monthlyPayment">-</span>
+            </div>
+            <div class="result-item">
+                <span>총 상환액</span>
+                <span class="result-value" id="totalPayment">-</span>
+            </div>
+            <div class="result-item">
+                <span>총 이자</span>
+                <span class="result-value" id="totalInterest">-</span>
+            </div>
+        </div>
+
+        <footer>
+            <p>💡 더 많은 정보: <a href="dsr-calculator.html">DSR 계산</a> | <a href="loan-guide.html">대출 가이드</a></p>
+            <p>© 2025 대출 계산기</p>
+        </footer>
+    </div>
+
+    <script>
+        function calculate() {
+            const principal = parseFloat(document.getElementById('loanAmount').value) * 10000;
+            const annualRate = parseFloat(document.getElementById('creditGrade').value) / 100;
+            const years = parseFloat(document.getElementById('period').value);
+
+            if (!principal || !annualRate || !years) {
+                alert('모든 값을 입력해주세요!');
+                return;
+            }
+
+            const monthlyRate = annualRate / 12;
+            const months = years * 12;
+            const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+            const totalPayment = monthlyPayment * months;
+            const totalInterest = totalPayment - principal;
+
+            document.getElementById('monthlyPayment').textContent = Math.round(monthlyPayment).toLocaleString('ko-KR') + '원';
+            document.getElementById('totalPayment').textContent = Math.round(totalPayment).toLocaleString('ko-KR') + '원';
+            document.getElementById('totalInterest').textContent = Math.round(totalInterest).toLocaleString('ko-KR') + '원';
+            document.getElementById('result').classList.add('show');
+        }
+    </script>
+</body>
+</html>

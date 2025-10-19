@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주택담보대출 계산기 - 원리금 균등상환 vs 원금균등상환 비교</title>
+    <meta name="description" content="주택담보대출, 전세자금대출 이자 계산기. 원리금균등상환과 원금균등상환 방식 비교, DSR/DTI 계산기 제공. 2025년 최신 금리 반영.">
+    <meta name="keywords" content="주택담보대출, 대출계산기, 원리금균등, 원금균등, 주담대, 이자계산, DSR, DTI">
+    <meta property="og:title" content="주택담보대출 계산기 - 대출 이자 간편 계산">
+    <meta property="og:description" content="원리금균등 vs 원금균등 비교, DSR/DTI 계산, 전세자금대출 계산 - 무료 대출 계산기">
+    <meta property="og:type" content="website">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        h1 {
+            font-size: 2.2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        nav a {
+            padding: 12px 20px;
+            background: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        nav a:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .info-box {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+        .calc-group {
+            margin-bottom: 25px;
+        }
+        .calc-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .hint {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .calc-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .calc-button:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        .result h3 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-value {
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+        .warning strong {
+            color: #856404;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 1.6em; }
+            .tabs { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏦 주택담보대출 계산기</h1>
+            <p class="subtitle">원리금균등 vs 원금균등 비교 · DSR/DTI 계산</p>
+        </header>
+
+        <nav>
+            <a href="index.html">🏠 주택담보대출</a>
+            <a href="jeonse-loan.html">🏘️ 전세자금대출</a>
+            <a href="credit-loan.html">💳 신용대출</a>
+            <a href="dsr-calculator.html">📊 DSR/DTI</a>
+            <a href="loan-guide.html">📖 대출가이드</a>
+        </nav>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('equal-principal-interest')">원리금균등</button>
+            <button class="tab" onclick="switchTab('equal-principal')">원금균등</button>
+        </div>
+
+        <!-- 원리금균등 탭 -->
+        <div id="equal-principal-interest" class="tab-content active">
+            <div class="info-box">
+                <h3>📌 원리금균등상환이란?</h3>
+                <p><strong>매월 납부액:</strong> 일정 (원금+이자 합계가 동일)</p>
+                <p><strong>특징:</strong> 초기 이자 부담 큼, 나중에 원금 상환 비중 증가</p>
+                <p><strong>장점:</strong> 매월 일정한 금액으로 자금 계획 수립 용이</p>
+            </div>
+
+            <div class="calc-group">
+                <label class="calc-label">💰 대출 금액 (만원)</label>
+                <input type="number" id="loanAmountEPI" placeholder="예: 30000 (3억원)">
+                <div class="hint">💡 만원 단위로 입력하세요</div>
+            </div>
+
+            <div class="calc-group">
+                <label class="calc-label">📅 대출 기간 (년)</label>
+                <input type="number" id="loanPeriodEPI" placeholder="예: 30">
+            </div>
+
+            <div class="calc-group">
+                <label class="calc-label">📈 연 이자율 (%)</label>
+                <input type="number" step="0.1" id="interestRateEPI" placeholder="예: 4.5">
+                <div class="hint">💡 2025년 평균 주담대 금리: 4.0~5.5%</div>
+            </div>
+
+            <button class="calc-button" onclick="calculateEPI()">💰 월 상환액 계산하기</button>
+
+            <div id="resultEPI" class="result">
+                <h3>💳 계산 결과</h3>
+                <div class="result-item">
+                    <span>월 상환액</span>
+                    <span class="result-value" id="monthlyPaymentEPI">-</span>
+                </div>
+                <div class="result-item">
+                    <span>총 상환액</span>
+                    <span class="result-value" id="totalPaymentEPI">-</span>
+                </div>
+                <div class="result-item">
+                    <span>총 이자</span>
+                    <span class="result-value" id="totalInterestEPI">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 원금균등 탭 -->
+        <div id="equal-principal" class="tab-content">
+            <div class="info-box">
+                <h3>📌 원금균등상환이란?</h3>
+                <p><strong>매월 납부액:</strong> 감소 (원금은 일정, 이자는 감소)</p>
+                <p><strong>특징:</strong> 초기 상환액이 높지만 점점 감소</p>
+                <p><strong>장점:</strong> 총 이자 부담이 원리금균등보다 적음</p>
+            </div>
+
+            <div class="calc-group">
+                <label class="calc-label">💰 대출 금액 (만원)</label>
+                <input type="number" id="loanAmountEP" placeholder="예: 30000 (3억원)">
+                <div class="hint">💡 만원 단위로 입력하세요</div>
+            </div>
+
+            <div class="calc-group">
+                <label class="calc-label">📅 대출 기간 (년)</label>
+                <input type="number" id="loanPeriodEP" placeholder="예: 30">
+            </div>
+
+            <div class="calc-group">
+                <label class="calc-label">📈 연 이자율 (%)</label>
+                <input type="number" step="0.1" id="interestRateEP" placeholder="예: 4.5">
+            </div>
+
+            <button class="calc-button" onclick="calculateEP()">💰 상환액 계산하기</button>
+
+            <div id="resultEP" class="result">
+                <h3>💳 계산 결과</h3>
+                <div class="result-item">
+                    <span>첫 달 상환액</span>
+                    <span class="result-value" id="firstPaymentEP">-</span>
+                </div>
+                <div class="result-item">
+                    <span>마지막 달 상환액</span>
+                    <span class="result-value" id="lastPaymentEP">-</span>
+                </div>
+                <div class="result-item">
+                    <span>총 상환액</span>
+                    <span class="result-value" id="totalPaymentEP">-</span>
+                </div>
+                <div class="result-item">
+                    <span>총 이자</span>
+                    <span class="result-value" id="totalInterestEP">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ 중요 안내사항</strong>
+            <p>본 계산기는 참고용이며, 실제 대출 조건은 은행별로 상이할 수 있습니다.</p>
+            <p>정확한 대출 상담은 각 금융기관에 문의하시기 바랍니다.</p>
+        </div>
+
+        <footer>
+            <p>💡 더 많은 대출 정보: <a href="dsr-calculator.html">DSR/DTI 계산</a> | <a href="loan-guide.html">대출 가이드</a></p>
+            <p>© 2025 대출 계산기 | 정보 출처: 금융감독원</p>
+        </footer>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function formatNumber(num) {
+            return Math.round(num).toLocaleString('ko-KR') + '원';
+        }
+
+        function calculateEPI() {
+            const principal = parseFloat(document.getElementById('loanAmountEPI').value) * 10000;
+            const years = parseFloat(document.getElementById('loanPeriodEPI').value);
+            const annualRate = parseFloat(document.getElementById('interestRateEPI').value) / 100;
+
+            if (!principal || !years || !annualRate) {
+                alert('모든 값을 입력해주세요!');
+                return;
+            }
+
+            const monthlyRate = annualRate / 12;
+            const months = years * 12;
+
+            // 원리금균등 월 상환액 공식
+            const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / 
+                                  (Math.pow(1 + monthlyRate, months) - 1);
+            
+            const totalPayment = monthlyPayment * months;
+            const totalInterest = totalPayment - principal;
+
+            document.getElementById('monthlyPaymentEPI').textContent = formatNumber(monthlyPayment);
+            document.getElementById('totalPaymentEPI').textContent = formatNumber(totalPayment);
+            document.getElementById('totalInterestEPI').textContent = formatNumber(totalInterest);
+            document.getElementById('resultEPI').classList.add('show');
+        }
+
+        function calculateEP() {
+            const principal = parseFloat(document.getElementById('loanAmountEP').value) * 10000;
+            const years = parseFloat(document.getElementById('loanPeriodEP').value);
+            const annualRate = parseFloat(document.getElementById('interestRateEP').value) / 100;
+
+            if (!principal || !years || !annualRate) {
+                alert('모든 값을 입력해주세요!');
+                return;
+            }
+
+            const months = years * 12;
+            const monthlyPrincipal = principal / months;
+            const monthlyRate = annualRate / 12;
+
+            // 원금균등: 첫 달과 마지막 달
+            const firstInterest = principal * monthlyRate;
+            const firstPayment = monthlyPrincipal + firstInterest;
+            
+            const lastInterest = monthlyPrincipal * monthlyRate;
+            const lastPayment = monthlyPrincipal + lastInterest;
+
+            // 총 이자 = (첫 달 이자 + 마지막 달 이자) * 개월수 / 2
+            const totalInterest = (firstInterest + lastInterest) * months / 2;
+            const totalPayment = principal + totalInterest;
+
+            document.getElementById('firstPaymentEP').textContent = formatNumber(firstPayment);
+            document.getElementById('lastPaymentEP').textContent = formatNumber(lastPayment);
+            document.getElementById('totalPaymentEP').textContent = formatNumber(totalPayment);
+            document.getElementById('totalInterestEP').textContent = formatNumber(totalInterest);
+            document.getElementById('resultEP').classList.add('show');
+        }
+    </script>
+</body>
+</html>

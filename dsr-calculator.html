@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSR DTI 계산기 - 총부채원리금상환비율</title>
+    <meta name="description" content="DSR, DTI 계산기. 총부채원리금상환비율 계산으로 대출 가능 금액 확인. 2025년 DSR 40% 규제 반영.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #667eea; }
+        h1 { font-size: 2.2em; color: #333; }
+        nav { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+        nav a { padding: 12px 20px; background: #f0f0f0; color: #333; text-decoration: none; border-radius: 8px; transition: all 0.3s; }
+        nav a:hover { background: #667eea; color: white; }
+        .info-box { background: #f8f9ff; padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #667eea; }
+        .calc-group { margin-bottom: 25px; }
+        .calc-label { display: block; font-weight: 600; margin-bottom: 8px; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; }
+        .hint { font-size: 0.9em; color: #888; margin-top: 5px; }
+        .calc-button { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 600; cursor: pointer; }
+        .result { margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; display: none; }
+        .result.show { display: block; }
+        .result-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.3); }
+        .result-value { font-weight: 700; font-size: 1.2em; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        footer { margin-top: 40px; text-align: center; color: #666; }
+        footer a { color: #667eea; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 DSR/DTI 계산기</h1>
+        </header>
+
+        <nav>
+            <a href="index.html">🏠 주택담보대출</a>
+            <a href="jeonse-loan.html">🏘️ 전세자금대출</a>
+            <a href="credit-loan.html">💳 신용대출</a>
+            <a href="dsr-calculator.html">📊 DSR/DTI</a>
+            <a href="loan-guide.html">📖 대출가이드</a>
+        </nav>
+
+        <div class="info-box">
+            <h3>📌 DSR이란?</h3>
+            <p><strong>DSR (총부채원리금상환비율):</strong> 연소득 대비 모든 대출 원리금 상환액 비율</p>
+            <p><strong>규제:</strong> 2025년 기준 DSR 40% (은행권 공통)</p>
+            <p><strong>계산식:</strong> (모든 대출 연간 원리금 / 연소득) × 100</p>
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">💰 연간 소득 (만원)</label>
+            <input type="number" id="income" placeholder="예: 6000 (6천만원)">
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">🏠 기존 주담대 월 상환액 (만원)</label>
+            <input type="number" id="existingMortgage" placeholder="예: 150" value="0">
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">💳 기존 신용대출 월 상환액 (만원)</label>
+            <input type="number" id="existingCredit" placeholder="예: 50" value="0">
+        </div>
+
+        <div class="calc-group">
+            <label class="calc-label">🚗 기타 대출 월 상환액 (만원)</label>
+            <input type="number" id="otherLoans" placeholder="예: 30" value="0">
+        </div>
+
+        <button class="calc-button" onclick="calculate()">📊 DSR 계산하기</button>
+
+        <div id="result" class="result">
+            <h3>💳 계산 결과</h3>
+            <div class="result-item">
+                <span>현재 DSR</span>
+                <span class="result-value" id="currentDSR">-</span>
+            </div>
+            <div class="result-item">
+                <span>추가 대출 가능 여부</span>
+                <span class="result-value" id="loanPossible">-</span>
+            </div>
+            <div class="result-item">
+                <span>추가 대출 가능액 (월)</span>
+                <span class="result-value" id="maxLoan">-</span>
+            </div>
+        </div>
+
+        <div class="warning" style="display:none;" id="warningBox">
+            <strong>⚠️ DSR 40% 초과</strong>
+            <p>현재 DSR이 규제 기준(40%)을 초과하여 추가 대출이 어려울 수 있습니다.</p>
+        </div>
+
+        <footer>
+            <p>💡 대출 정보: <a href="index.html">주담대 계산</a> | <a href="loan-guide.html">대출 가이드</a></p>
+            <p>© 2025 대출 계산기</p>
+        </footer>
+    </div>
+
+    <script>
+        function calculate() {
+            const annualIncome = parseFloat(document.getElementById('income').value) * 10000;
+            const mortgage = parseFloat(document.getElementById('existingMortgage').value || 0) * 10000;
+            const credit = parseFloat(document.getElementById('existingCredit').value || 0) * 10000;
+            const other = parseFloat(document.getElementById('otherLoans').value || 0) * 10000;
+
+            if (!annualIncome) {
+                alert('연소득을 입력해주세요!');
+                return;
+            }
+
+            const monthlyIncome = annualIncome / 12;
+            const totalMonthlyPayment = mortgage + credit + other;
+            const annualPayment = totalMonthlyPayment * 12;
+            const dsr = (annualPayment / annualIncome) * 100;
+
+            const dsrLimit = 40; // 2025년 DSR 규제
+            const maxMonthlyPayment = (annualIncome * (dsrLimit / 100)) / 12;
+            const availablePayment = maxMonthlyPayment - totalMonthlyPayment;
+
+            document.getElementById('currentDSR').textContent = dsr.toFixed(1) + '%';
+            
+            if (dsr > dsrLimit) {
+                document.getElementById('loanPossible').textContent = '불가능 ❌';
+                document.getElementById('maxLoan').textContent = '0원';
+                document.getElementById('warningBox').style.display = 'block';
+            } else {
+                document.getElementById('loanPossible').textContent = '가능 ✅';
+                document.getElementById('maxLoan').textContent = Math.round(availablePayment).toLocaleString('ko-KR') + '원';
+                document.getElementById('warningBox').style.display = 'none';
+            }
+
+            document.getElementById('result').classList.add('show');
+        }
+    </script>
+</body>
+</html>
